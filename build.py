@@ -51,7 +51,7 @@ if __name__ == "__main__":
                      or int(settings['compiler.version']) > 12) \
                 and settings['arch'] == "x86_64" and settings['build_type'] != 'Debug':
             pybind_options = dict(options)
-            pybind_options.update({'xmsinterp:pybind': True})
+            pybind_options.update({'xmsinterp:pybind': python_target_version})
             pybind_updated_builds.append([settings, pybind_options, env_vars, build_requires])
 
         pybind_updated_builds.append([settings, options, env_vars, build_requires])
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     testing_updated_builds = []
     for settings, options, env_vars, build_requires, reference in builder.items:
         # xms option
-        if not options.get('xmsinterp:xms', False) and not options.get('xmsinterp:pybind', False):
+        if not options.get('xmsinterp:xms', False) and not options.get('xmsinterp:pybind', None):
             testing_options = dict(options)
             testing_options.update({'xmsinterp:testing': True})
             testing_updated_builds.append([settings, testing_options, env_vars, build_requires])

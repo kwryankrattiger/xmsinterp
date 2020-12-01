@@ -12,10 +12,10 @@ class XmsinterpConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "xms": [True, False],
-        "pybind": [True, False],
+        "pybind": ["", "3.6", "3.7", "3.8", "3.9"],
         "testing": [True, False],
     }
-    default_options = "xms=False", "pybind=False", "testing=False"
+    default_options = "xms=False", "pybind=", "testing=False"
     generators = "cmake"
     build_requires = "cxxtest/4.4@aquaveo/stable"
     exports = "CMakeLists.txt", "LICENSE"
@@ -53,7 +53,7 @@ class XmsinterpConan(ConanFile):
         else:
             self.requires("boost/1.74.0@aquaveo/stable")
 
-        if self.options.pybind:
+        if self.options.pybind != "":
             self.requires("pybind11/2.5.0@aquaveo/testing")
 
         self.requires("xmscore/4.0.2@aquaveo/stable")
@@ -75,7 +75,7 @@ class XmsinterpConan(ConanFile):
         # build a test version (without python), run the tests, and then (on
         # sucess) rebuild the library without tests.
         cmake.definitions["XMS_VERSION"] = '{}'.format(self.version)
-        cmake.definitions["IS_PYTHON_BUILD"] = self.options.pybind
+        cmake.definitions["IS_PYTHON_BUILD"] = self.options.pybind != ""
         cmake.definitions["BUILD_TESTING"] = self.options.testing
         cmake.definitions["XMS_TEST_PATH"] = "test_files"
         cmake.definitions["PYTHON_TARGET_VERSION"] = self.env.get("PYTHON_TARGET_VERSION", "3.6")
@@ -96,7 +96,7 @@ class XmsinterpConan(ConanFile):
                             no_newline = line.strip('\n')
                             print(no_newline)
                 print("***********(0.0)*************")
-        elif self.options.pybind:
+        elif self.options.pybind != "":
             with tools.pythonpath(self):
                 if not self.settings.os == "Macos":
                   self.run('pip install --user numpy wheel')
