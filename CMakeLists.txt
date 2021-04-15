@@ -5,7 +5,7 @@ set(CMAKE_DEBUG_POSTFIX _d)
 if (APPLE OR WIN32)
     set(CMAKE_CXX_STANDARD 17)
 else()
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 14)
 endif()
 
 if (APPLE)
@@ -14,32 +14,51 @@ else()
 	set(CMAKE_POSITION_INDEPENDENT_CODE True)
 endif()
 
-project(xmsinterplib C CXX)
+project(xmsinterp C CXX)
 
+include(GNUInstallDirs)
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Enable/Disable building shared libraries")
 set(BUILD_TESTING NO CACHE BOOL "Enable/Disable testing")
-set(IS_CONDA_BUILD NO CACHE BOOL "Set this if you want to make a conda package.")
-set(PYTHON_TARGET_VERSION 3.6 CACHE STRING "Version of python to link to for python wrapping.")
+set(XMS_BUILD_MODE "CONAN" CACHE STRING "Target packing system to build for.")
+set_property(CACHE XMS_BUILD_MODE PROPERTY STRINGS "CONAN;CONDA;CMAKE")
+set(XMS_BUILD NO CACHE BOOL "Set this if you want to use this package with XMS.")
 set(CONDA_PREFIX "" CACHE PATH "Path to the conda environment used to build.")
-set(IS_PYTHON_BUILD NO CACHE BOOL "Set this if you want to build the python bindings.")
+set(ENABLE_PYTHON OFF CACHE BOOL "Set this if you want to build the python bindings.")
+set(PYTHON_TARGET_VERSION 3.6 CACHE STRING "Version of python to link to for python wrapping.")
 set(XMS_TEST_PATH ${PROJECT_SOURCE_DIR}/test_files/ CACHE PATH "Path to test files for testing")
-set(XMS_VERSION "\"99.99.99\"" CACHE STRING "Library Version")
+set(XMS_VERSION "5.2.0" CACHE STRING "Library Version")
 
 add_definitions(-DXMS_VERSION=\"${XMS_VERSION}\")
 
-if(IS_PYTHON_BUILD AND BUILD_TESTING)
+if(ENABLE_PYTHON AND BUILD_TESTING)
   message(FATAL_ERROR "Cannot build python module when testing is enabled")
 endif()
 
-if(IS_CONDA_BUILD)
+if(XMS_BUILD_MODE STREQUAL "CONDA")
   include(${CMAKE_CURRENT_LIST_DIR}/condabuildinfo.cmake)
+elseif(XMS_BUILD_MODE STREQUAL "CMAKE")
+  if (BUILD_SHARED_LIBS)
+    set(Boost_USE_STATIC_LIBS OFF)
+  else ()
+    set(Boost_USE_STATIC_LIBS ON)
+  endif ()
+  find_package(Boost QUIET REQUIRED log_setup log system filesystem serialization timer)
+  find_package(XMSCore QUIET REQUIRED
+    NAMES xms xmscore)
+  find_package(XMSGrid QUIET REQUIRED
+    NAMES xms xmsgrid)
+  list(APPEND EXT_INCLUDE_DIRS ${XMSCore_INCLUDE_DIRS};${XMSGrid_INCLUDE_DIRS};${Boost_INCLUDE_DIRS})
+  list(APPEND EXT_LIB_DIRS ${XMSCore_LIBRARY_DIRS};${XMSGrid_LIBRARY_DIRS};${Boost_LIBRARY_DIRS})
+  list(APPEND EXT_LIBS ${XMSCore_LIBRARIES};${XMSGrid_LIBRARIES};${Boost_LIBRARIES};z)
 else() # If we are not using conda, we are using conan
   # Conan setup
   include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(TARGETS)
-  set(EXT_INCLUDE_DIRS ${CONAN_INCLUDE_DIRS})
-  set(EXT_LIB_DIRS ${CONAN_LIB_DIRS})
-  set(EXT_LIBS ${CONAN_LIBS})
-endif(IS_CONDA_BUILD)
+  list(APPEND EXT_INCLUDE_DIRS ${CONAN_INCLUDE_DIRS})
+  list(APPEND EXT_LIB_DIRS ${CONAN_LIB_DIRS})
+  list(APPEND EXT_LIBS ${CONAN_LIBS})
+endif()
 
 if(WIN32)
     string(COMPARE EQUAL "${CONAN_SETTINGS_COMPILER_RUNTIME}" "MT" USES_MT)
@@ -62,21 +81,22 @@ if(WIN32)
     endif()
 endif()
 
-if(IS_PYTHON_BUILD)
+if(ENABLE_PYTHON)
     # Pybind11 module
-    if(IS_CONDA_BUILD)
+    if(XMS_BUILD_MODE STREQUAL "CONDA")
         include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Targets.cmake")
         include("${CONDA_PREFIX}/share/cmake/pybind11/FindPythonLibsNew.cmake")
         include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Config.cmake")
         include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11ConfigVersion.cmake")
         include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Tools.cmake")
-
-    else()
+    elseif(XMS_BUILD_MODE STREQUAL "CONAN")
         include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Targets.cmake")
         include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/FindPythonLibsNew.cmake")
         include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Config.cmake")
         include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11ConfigVersion.cmake")
         include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Tools.cmake")
+    else()
+        find_package(pybind11 CONFIG REQUIRED)
     endif()
 
 	list(APPEND EXT_INCLUDE_DIRS
@@ -92,10 +112,6 @@ if(IS_PYTHON_BUILD)
       ${PYTHON_INCLUDE_DIRS}
     )
 endif()
-
-message("External Include Dirs: ${EXT_INCLUDE_DIRS}")
-message("External Lib Dirs: ${EXT_LIB_DIRS}")
-message("Extneral Libs: ${EXT_LIBS}")
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 include_directories(${EXT_INCLUDE_DIRS})
@@ -181,9 +197,10 @@ if (BUILD_TESTING)
 endif ()
 
 # Static library
-add_library(${PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME}
   ${xmsinterp_sources} ${xmsinterp_headers}
 )
+set_property(TARGET ${PROJECT_NAME} PROPERTY EXPORT_NAME Interp)
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
@@ -201,7 +218,7 @@ if(UNIX AND NOT APPLE)
     target_link_libraries(${PROJECT_NAME} rt)
 endif()
 
-if(IS_PYTHON_BUILD)
+if(ENABLE_PYTHON)
     pybind11_add_module(_xmsinterp
       ${xmsinterp_py} ${xmsinterp_py_headers}
     )
@@ -219,20 +236,32 @@ if(IS_PYTHON_BUILD)
       LINKER_LANGUAGE CXX
     )
 
+    if (XMS_BUILD_MODE STREQUAL "CMAKE")
+      # Using a standard installation heirarchy for python packages
+      set(XMS_PYTHON_INSTALL_PREFIX "${CMAKE_INSTALL_LIBDIR}/python-${PYTHON_TARGET_VERSION}/site-packages")
+      # Skip installing setup.py
+      set(XMS_PYTHON_INSTALL_PACKAGE_EXTRA
+        PATTERN "setup.py" EXCLUDE)
+    else ()
+      set(XMS_PYTHON_INSTALL_PREFIX "_package")
+    endif ()
     # Install recipe
     install(
       TARGETS _xmsinterp
-      ARCHIVE DESTINATION "_package/xms/interp"
-      LIBRARY DESTINATION "_package/xms/interp"
+      ARCHIVE DESTINATION "${XMS_PYTHON_INSTALL_PREFIX}/xms/interp"
+      LIBRARY DESTINATION "${XMS_PYTHON_INSTALL_PREFIX}/xms/interp"
     )
 
-  install(DIRECTORY "_package/" DESTINATION "_package"
-           FILES_MATCHING PATTERN "*.py"
-           PATTERN "_package/tests" EXCLUDE)
+    install(
+      DIRECTORY "_package/"
+      DESTINATION "${XMS_PYTHON_INSTALL_PREFIX}"
+      FILES_MATCHING PATTERN "*.py"
+      PATTERN "_package/tests" EXCLUDE
+      ${XMS_PYTHON_INSTALL_PACKAGE_EXTRA})
 endif()
 
 # Disable Optimization for GCC6 for now... Report issue to gcc and pybind
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND IS_PYTHON_BUILD)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND ENABLE_PYTHON)
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 6 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
     Message("Disabling Optimization for GCC 6...")
     STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
@@ -243,8 +272,11 @@ endif()
 # Install recipe
 install(
   TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION "lib"
-  LIBRARY DESTINATION "lib"
+  EXPORT ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 foreach (header IN LISTS xmsinterp_headers xmsinterp_py_headers)
   get_filename_component(subdir "${header}" DIRECTORY)
@@ -254,3 +286,13 @@ foreach (header IN LISTS xmsinterp_headers xmsinterp_py_headers)
   )
 endforeach ()
 
+# Install the CMake configs
+install(
+  EXPORT ${PROJECT_NAME}
+  FILE xmsinterp-targets.cmake
+  NAMESPACE XMS::
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/xms")
+
+install(
+  FILES CMake/xmsinterp-config.cmake
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/xms")
