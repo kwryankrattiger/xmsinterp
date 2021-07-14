@@ -4,15 +4,15 @@ set(CMAKE_DEBUG_POSTFIX _d)
 
 if (APPLE OR WIN32)
     set(CMAKE_CXX_STANDARD 17)
-else()
+else ()
     set(CMAKE_CXX_STANDARD 14)
-endif()
+endif ()
 
 if (APPLE)
 	set(CMAKE_POSITION_INDEPENDENT_CODE False)
-else()
+else ()
 	set(CMAKE_POSITION_INDEPENDENT_CODE True)
-endif()
+endif ()
 
 project(xmsinterp C CXX)
 
@@ -31,13 +31,13 @@ set(XMS_VERSION "5.2.0" CACHE STRING "Library Version")
 
 add_definitions(-DXMS_VERSION=\"${XMS_VERSION}\")
 
-if(ENABLE_PYTHON AND BUILD_TESTING)
+if (ENABLE_PYTHON AND BUILD_TESTING)
   message(FATAL_ERROR "Cannot build python module when testing is enabled")
-endif()
+endif ()
 
-if(XMS_BUILD_MODE STREQUAL "CONDA")
+if (XMS_BUILD_MODE STREQUAL "CONDA")
   include(${CMAKE_CURRENT_LIST_DIR}/condabuildinfo.cmake)
-elseif(XMS_BUILD_MODE STREQUAL "CMAKE")
+elseif (XMS_BUILD_MODE STREQUAL "CMAKE")
   if (BUILD_SHARED_LIBS)
     set(Boost_USE_STATIC_LIBS OFF)
   else ()
@@ -51,59 +51,65 @@ elseif(XMS_BUILD_MODE STREQUAL "CMAKE")
   list(APPEND EXT_INCLUDE_DIRS ${XMSCore_INCLUDE_DIRS};${XMSGrid_INCLUDE_DIRS};${Boost_INCLUDE_DIRS})
   list(APPEND EXT_LIB_DIRS ${XMSCore_LIBRARY_DIRS};${XMSGrid_LIBRARY_DIRS};${Boost_LIBRARY_DIRS})
   list(APPEND EXT_LIBS ${XMSCore_LIBRARIES};${XMSGrid_LIBRARIES};${Boost_LIBRARIES};z)
-else() # If we are not using conda, we are using conan
+else () # If we are not using conda, we are using conan
   # Conan setup
   include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(TARGETS)
   list(APPEND EXT_INCLUDE_DIRS ${CONAN_INCLUDE_DIRS})
   list(APPEND EXT_LIB_DIRS ${CONAN_LIB_DIRS})
   list(APPEND EXT_LIBS ${CONAN_LIBS})
-endif()
+endif ()
 
-if(WIN32)
+if (WIN32)
     string(COMPARE EQUAL "${CONAN_SETTINGS_COMPILER_RUNTIME}" "MT" USES_MT)
-    if(NOT USES_MT)
+    if (NOT USES_MT)
         string(COMPARE EQUAL "${CONAN_SETTINGS_COMPILER_RUNTIME}" "MTd" USES_MT)
-    endif()
+    endif ()
 
-    if(USES_MT)
+    if (USES_MT)
         message("Treating wchar_t as a built-in type.")
         add_definitions(/Zc:wchar_t)  # Treat wchar_t as built-in type
-    else()
+    else ()
         message("Treating wchar_t as a typedef.")
         add_definitions(/Zc:wchar_t-)  # Treat wchar_t as typedef
-    endif()
+    endif ()
 
-    if(XMS_BUILD)
+    if (XMS_BUILD)
         add_definitions(/D _WIN32_WINNT=0x0501)  # Windows XP and higher
-    else(NOT XMS_BUILD)
+    else (NOT XMS_BUILD)
         add_definitions(/D BOOST_ALL_NO_LIB)
-    endif()
-endif()
+    endif ()
+endif ()
 
-if(ENABLE_PYTHON)
+if (ENABLE_PYTHON)
     # Pybind11 module
-    if(XMS_BUILD_MODE STREQUAL "CONDA")
-        include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Targets.cmake")
-        include("${CONDA_PREFIX}/share/cmake/pybind11/FindPythonLibsNew.cmake")
-        include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Config.cmake")
-        include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11ConfigVersion.cmake")
-        include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Tools.cmake")
-    elseif(XMS_BUILD_MODE STREQUAL "CONAN")
-        include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Targets.cmake")
-        include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/FindPythonLibsNew.cmake")
-        include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Config.cmake")
-        include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11ConfigVersion.cmake")
-        include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Tools.cmake")
-    else()
-        find_package(pybind11 CONFIG REQUIRED)
-    endif()
+    if (NOT XMS_BUILD_MODE STREQUAL "CMAKE")
+        if (XMS_BUILD_MODE STREQUAL "CONDA")
+            include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Targets.cmake")
+            include("${CONDA_PREFIX}/share/cmake/pybind11/FindPythonLibsNew.cmake")
+            include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Config.cmake")
+            include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11ConfigVersion.cmake")
+            include("${CONDA_PREFIX}/share/cmake/pybind11/pybind11Tools.cmake")
+        elseif (XMS_BUILD_MODE STREQUAL "CONAN")
+            include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Targets.cmake")
+            include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/FindPythonLibsNew.cmake")
+            include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Config.cmake")
+            include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11ConfigVersion.cmake")
+            include("${CONAN_PYBIND11_ROOT}/share/cmake/pybind11/pybind11Tools.cmake")
 
-	list(APPEND EXT_INCLUDE_DIRS
+        endif ()
+
+        find_package(PythonLibsNew ${PYTHON_TARGET_VERSION} EXACT REQUIRED)
+    else ()
+        # New method does not require PythonLibsNew
+        find_package(Python REQUIRED COMPONENTS Interpreter)
+        set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+        find_package(pybind11 CONFIG REQUIRED)
+    endif ()
+
+    list(APPEND EXT_INCLUDE_DIRS
         ${pybind11_INCLUDE_DIR}
     )
-
-    find_package(PythonLibsNew ${PYTHON_TARGET_VERSION} EXACT REQUIRED)
 
     message("PYTHON_INCLUDE: ${PYTHON_INCLUDE_DIRS}")
     message("PYTHON_LIBS: ${PYTHON_LIBRARIES}")
@@ -111,7 +117,7 @@ if(ENABLE_PYTHON)
     list(APPEND EXT_INCLUDE_DIRS
       ${PYTHON_INCLUDE_DIRS}
     )
-endif()
+endif ()
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 include_directories(${EXT_INCLUDE_DIRS})
@@ -183,7 +189,7 @@ if (BUILD_TESTING)
  )
 
  find_package(CxxTest)
- if(CXXTEST_FOUND)
+ if (CXXTEST_FOUND)
    include_directories(${CXXTEST_INCLUDE_DIR})
    enable_testing()
 
@@ -193,7 +199,7 @@ if (BUILD_TESTING)
      runner runner.cpp ${test_headers}
    )
    target_link_libraries(runner ${PROJECT_NAME})
- endif()
+ endif ()
 endif ()
 
 # Static library
@@ -214,11 +220,11 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   ${CMAKE_THREAD_LIBS_INIT}
 )
-if(UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE)
     target_link_libraries(${PROJECT_NAME} rt)
-endif()
+endif ()
 
-if(ENABLE_PYTHON)
+if (ENABLE_PYTHON)
     pybind11_add_module(_xmsinterp
       ${xmsinterp_py} ${xmsinterp_py_headers}
     )
@@ -258,16 +264,16 @@ if(ENABLE_PYTHON)
       FILES_MATCHING PATTERN "*.py"
       PATTERN "_package/tests" EXCLUDE
       ${XMS_PYTHON_INSTALL_PACKAGE_EXTRA})
-endif()
+endif ()
 
 # Disable Optimization for GCC6 for now... Report issue to gcc and pybind
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND ENABLE_PYTHON)
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 6 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND ENABLE_PYTHON)
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 6 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
     Message("Disabling Optimization for GCC 6...")
     STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "-O3" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-  endif()
-endif()
+  endif ()
+endif ()
 
 # Install recipe
 install(
