@@ -8,6 +8,7 @@
 
 //----- Included files ---------------------------------------------------------
 #include <vector>
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/points/ptsfwd.h>
 #include <xmscore/misc/base_macros.h>
 #include <xmscore/misc/boost_defines.h>
@@ -22,7 +23,7 @@ class NodalFunc;
 //----- Constants / Enumerations -----------------------------------------------
 
 //----- Structs / Classes ------------------------------------------------------
-class InterpCt
+class XMSINTERP_EXPORT InterpCt
 {
 public:
   /// Triangle region enumeration

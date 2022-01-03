@@ -13,6 +13,7 @@
 // 4. External Library Headers
 
 // 5. Shared Headers
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/points/ptsfwd.h>
 #include <xmscore/stl/vector.h>
 #include <xmsinterp/interpolate/InterpBase.h>
@@ -34,7 +35,7 @@ class Observer;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Class that performs linear interpolation
 /// \see InterpLinearImpl
-class InterpLinear : public InterpBase
+class XMSINTERP_EXPORT InterpLinear : public InterpBase
 {
 public:
   static BSHP<InterpLinear> New();

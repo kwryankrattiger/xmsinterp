@@ -8,6 +8,7 @@
 
 //----- Included files ---------------------------------------------------------
 #include <vector>
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/misc/base_macros.h> // XM_DISALLOW_COPY_AND_ASSIGN
 #include <xmscore/misc/boost_defines.h>
 
@@ -24,7 +25,7 @@ class Observer;
 //----- Structs / Classes ------------------------------------------------------
 /// \brief Manages a multi-threaded process
 /// \see ThreadMgrImpl
-class ThreadMgr
+class XMSINTERP_EXPORT ThreadMgr
 {
 public:
   static BSHP<ThreadMgr> New();

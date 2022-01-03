@@ -8,6 +8,7 @@
 
 //----- Included files ---------------------------------------------------------
 #include <vector>
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/points/ptsfwd.h>    // for Pt3d
 #include <xmscore/misc/base_macros.h> // XM_DISALLOW_COPY_AND_ASSIGN
 #include <xmscore/misc/boost_defines.h>
@@ -27,7 +28,7 @@ class Observer;
 /// \brief Class to compute gradient plane and quadratic nodal functions for
 /// interpolation.
 /// \see NodalFuncImpl
-class NodalFunc
+class XMSINTERP_EXPORT NodalFunc
 {
 public:
   static BSHP<NodalFunc> New(int a_type,

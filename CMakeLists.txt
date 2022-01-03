@@ -17,6 +17,7 @@ endif ()
 project(xmsinterp C CXX)
 
 include(GNUInstallDirs)
+include(GenerateExportHeader)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Enable/Disable building shared libraries")
 set(BUILD_TESTING NO CACHE BOOL "Enable/Disable testing")
@@ -238,6 +239,14 @@ target_link_libraries(${PROJECT_NAME}
 if (UNIX AND NOT APPLE)
     target_link_libraries(${PROJECT_NAME} rt)
 endif ()
+generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME xmsinterp/xmsinterp_export.h)
+target_include_directories(xmsinterp
+  PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+install(FILES ${PROJECT_BINARY_DIR}/xmsinterp/xmsinterp_export.h
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xmsinterp
+  )
 
 if (ENABLE_PYTHON)
     pybind11_add_module(_xmsinterp
@@ -245,7 +254,7 @@ if (ENABLE_PYTHON)
     )
     target_include_directories(_xmsinterp
         PRIVATE
-	      ${EXT_LIBS}
+          ${EXT_LIBS}
           ${PYTHON_INCLUDE_DIRS}
     )
     target_link_libraries(_xmsinterp
@@ -256,6 +265,16 @@ if (ENABLE_PYTHON)
     set_target_properties(_xmsinterp PROPERTIES
       LINKER_LANGUAGE CXX
     )
+    generate_export_header(_xmsinterp
+      BASE_NAME xmsinterppy
+      EXPORT_FILE_NAME xmsinterp/python/xmsinterppy_export.h)
+    target_include_directories(_xmsinterp
+      PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    install(FILES ${PROJECT_BINARY_DIR}/xmsinterp/python/xmsinterppy_export.h
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}xmsinterp/python
+      )
 
     if (XMS_BUILD_MODE STREQUAL "CMAKE")
       # Using a standard installation heirarchy for python packages

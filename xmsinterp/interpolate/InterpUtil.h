@@ -14,6 +14,7 @@
 // 4. External library headers
 
 // 5. Shared code headers
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/points/pt.h>     // for Pt3d
 #include <xmscore/points/ptsfwd.h> // for Pt3d
 #include <xmscore/misc/DynBitset.h>
@@ -31,7 +32,7 @@ namespace xms
 
 //----- Structs / Classes ------------------------------------------------------
 /// \brief Convenience struct used in interpolation utility functions
-struct InterpPtInfo
+struct XMSINTERP_EXPORT InterpPtInfo
 {
 public:
   Pt3d m_loc;      ///< location of interest
@@ -40,28 +41,28 @@ public:
 };
 
 //----- Function prototypes ----------------------------------------------------
-void inNodalFuncSetUpMatrixAndVector(double xk,
+XMSINTERP_EXPORT void inNodalFuncSetUpMatrixAndVector(double xk,
                                      double yk,
                                      double fk,
                                      const std::vector<InterpPtInfo>& closest,
                                      double** M,
                                      double* VV);
-void inNodalFuncSetUpMatrixAndVector3d(double xk,
+XMSINTERP_EXPORT void inNodalFuncSetUpMatrixAndVector3d(double xk,
                                        double yk,
                                        double zk,
                                        double fk,
                                        const std::vector<InterpPtInfo>& closest,
                                        double** M,
                                        double* VV);
-void inDistanceSquared(const Pt3d& a_pt,
+XMSINTERP_EXPORT void inDistanceSquared(const Pt3d& a_pt,
                        const std::vector<int>& a_ptIdxs,
                        const std::vector<Pt3d>& a_ptLoc,
                        bool a_2d,
                        std::vector<double>& a_d2);
-void inIdwWeights(const std::vector<double>& a_d2,
+XMSINTERP_EXPORT void inIdwWeights(const std::vector<double>& a_d2,
                   double a_power,
                   bool a_modifiedShepardWeights,
                   std::vector<double>& a_w);
-bool inAllScalarsEqual(const std::vector<float>& a_scalar, const DynBitset& a_act);
+XMSINTERP_EXPORT bool inAllScalarsEqual(const std::vector<float>& a_scalar, const DynBitset& a_act);
 
 } // namespace xms

@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 
 //----- Included files ---------------------------------------------------------
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/misc/base_macros.h>
 #include <xmscore/points/ptsfwd.h>
 #include <xmscore/stl/vector.h>
@@ -28,7 +29,7 @@ class Observer;
 ///        using inverse distance weighted interpolation after scaling the
 ///        transformed x-values.
 /// \see InterpAnisotropicImpl and AnisotropicInterpolator.
-class InterpAnisotropic
+class XMSINTERP_EXPORT InterpAnisotropic
 {
 public:
   static BSHP<InterpAnisotropic> New();

@@ -8,6 +8,7 @@
 
 //----- Included files ---------------------------------------------------------
 #include <vector>
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/misc/base_macros.h>
 #include <xmscore/misc/boost_defines.h>
 #include <xmscore/points/ptsfwd.h>
@@ -25,7 +26,7 @@ class GmTriSearch;
 //----- Structs / Classes ------------------------------------------------------
 /// \brief Class that performs natural neighbor interpolation
 /// \see InterpNatNeighImpl
-class InterpNatNeigh
+class XMSINTERP_EXPORT InterpNatNeigh
 {
 public:
   static boost::shared_ptr<InterpNatNeigh> New(const std::vector<Pt3d>& a_pts,

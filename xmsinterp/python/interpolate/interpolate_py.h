@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 
 //----- Included files ---------------------------------------------------------
+#include <xmsinterp/python/xmsinterppy_export.h>
 #include <pybind11/pybind11.h>
 
 //----- Namespace declaration --------------------------------------------------
@@ -20,4 +21,4 @@ void initInterpAnisotropic(py::module &);
 void initInterpLinear(py::module &);
 void initInterpIdw(py::module &);
 void initInterpBase(py::module &);
-std::string PyReprStringFromInterpBase(const xms::InterpBase& a_interpBase);
+XMSINTERPPY_EXPORT std::string PyReprStringFromInterpBase(const xms::InterpBase& a_interpBase);

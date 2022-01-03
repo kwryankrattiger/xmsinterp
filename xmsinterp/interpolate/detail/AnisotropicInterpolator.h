@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 
 //----- Included files ---------------------------------------------------------
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/misc/base_macros.h>
 #include <xmscore/misc/boost_defines.h>
 #include <xmscore/points/ptsfwd.h>
@@ -25,7 +26,7 @@ namespace xms
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Hold data of transforming from xyz to station,normal space
-struct SNResult
+struct XMSINTERP_EXPORT SNResult
 {
   /// \brief Construct a station normal result
   /// \param[in] a_index The index of the centerline segment contain the station
@@ -51,7 +52,7 @@ struct SNResult
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief 2D Line definition. If vertical m_slope is Nan.
-struct LineParameters
+struct XMSINTERP_EXPORT LineParameters
 {
   /// \brief Constructor from slope and intercept
   /// \param[in] a_slope The slope. Use kVERTICAL for vertical lines.
@@ -88,7 +89,7 @@ typedef std::vector<SNResult> VecSNResult;
 /// weighting (raised to a power) from the interpolation points will be used to
 /// compute the interpolated z value. This is an internal implementation class
 /// used by InterpAnisotropic.
-class AnisotropicInterpolator
+class XMSINTERP_EXPORT AnisotropicInterpolator
 {
 public:
   AnisotropicInterpolator();
