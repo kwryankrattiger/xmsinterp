@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 
 //----- Included files ---------------------------------------------------------
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/misc/base_macros.h> // XM_DISALLOW_COPY_AND_ASSIGN
 #include <xmscore/misc/boost_defines.h>
 
@@ -20,7 +21,7 @@ namespace xms
 //----- Structs / Classes ------------------------------------------------------
 /// \brief Thread worker class
 /// \see ThreadLoop::impl
-class ThreadLoop
+class XMSINTERP_EXPORT ThreadLoop
 {
 public:
   ThreadLoop();

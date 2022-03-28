@@ -8,6 +8,7 @@
 
 //----- Included files ---------------------------------------------------------
 #include <xmscore/misc/base_macros.h>
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmsinterp/interpolate/InterpBase.h>
 #include <xmscore/points/ptsfwd.h>
 #include <xmscore/stl/vector.h>
@@ -25,7 +26,7 @@ class Observer;
 //----- Structs / Classes ------------------------------------------------------
 /// \brief Class that performs inverse distance weighted interpolation
 /// \see InterpIdwImpl
-class InterpIdw : public InterpBase
+class XMSINTERP_EXPORT InterpIdw : public InterpBase
 {
 public:
   static BSHP<InterpIdw> New();

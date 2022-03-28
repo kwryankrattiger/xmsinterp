@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 
 //----- Included files ---------------------------------------------------------
+#include <xmsinterp/xmsinterp_export.h>
 #include <xmscore/misc/base_macros.h>
 #include <xmscore/misc/boost_defines.h>
 #include <xmscore/misc/DynBitset.h>
@@ -25,7 +26,7 @@ namespace xms
 ////////////////////////////////////////////////////////////////////////////////
 /// \class InterpBase
 /// \brief Base class for interpolation methods.
-class InterpBase
+class XMSINTERP_EXPORT InterpBase
 {
 public:
   /// \cond These are all documented in the implementations
