@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.2)
+cmake_minimum_required(VERSION 3.12.2)
 cmake_policy(SET CMP0015 NEW) # Link Directory Pathing
 set(CMAKE_DEBUG_POSTFIX _d)
 
@@ -273,7 +273,7 @@ if (ENABLE_PYTHON)
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
     install(FILES ${PROJECT_BINARY_DIR}/xmsinterp/python/xmsinterppy_export.h
-      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}xmsinterp/python
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xmsinterp/python
       )
 
     if (XMS_BUILD_MODE STREQUAL "CMAKE")
